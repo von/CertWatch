@@ -105,20 +105,23 @@ def scan_services(db, args):
     args.output.info("Scanning service...")
     for service in db.get_services():
         args.output.info("Checking {}".format(service.hostname))
-        # TODO: Fix hard-coded port #
-        cert_pem = ssl.get_server_certificate((service.hostname, 443))
-        cert_der = ssl.PEM_cert_to_DER_cert(cert_pem)
-        fingerprint = hashlib.sha1(cert_der).hexdigest()
-        args.output.debug("Fingerprint is " + fingerprint)
-        if len(service.fingerprint) == 0:
-            args.output.info("First time scanned")
-            db.update_service(service.hostname, fingerprint)
-        elif service.fingerprint != fingerprint:
-            args.output.info("Fingerprint has changed.")
-            changed_fingerprint(service, fingerprint)
-            db.update_service(service.hostname, fingerprint)
-        else:
-            args.output.debug("No change.")
+        try:
+            # TODO: Fix hard-coded port #
+            cert_pem = ssl.get_server_certificate((service.hostname, 443))
+            cert_der = ssl.PEM_cert_to_DER_cert(cert_pem)
+            fingerprint = hashlib.sha1(cert_der).hexdigest()
+            args.output.debug("Fingerprint is " + fingerprint)
+            if len(service.fingerprint) == 0:
+                args.output.info("First time scanned")
+                db.update_service(service.hostname, fingerprint)
+            elif service.fingerprint != fingerprint:
+                args.output.info("Fingerprint has changed.")
+                changed_fingerprint(service, fingerprint)
+                db.update_service(service.hostname, fingerprint)
+            else:
+                args.output.debug("No change.")
+        except Exception as e:
+            args.output.exception("Error checking {}".format(e))
         
         
 ######################################################################
