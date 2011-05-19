@@ -56,6 +56,11 @@ class DataBase:
         self.__execute("insert into " + self.TABLE_NAME + " values (?,?,?)",
                        (service, "", 0))
 
+    def delete_service(self, service):
+        """Delete a service from the database"""
+        self.__execute("delete from " + self.TABLE_NAME + " " +
+                       "where hostname=?", (service,))
+
     def get_service(self, service):
         rows = self.__execute("select * from " + self.TABLE_NAME + " where hostname=?", (service,))
         if len(rows) == 0:
@@ -95,6 +100,14 @@ def add_services(db, args):
             db.add_service(service)
         else:
             args.output.info("Service {} already in database".format(service))
+
+def delete_services(db, args):
+    for service in args.services:
+        if db.get_service(service):
+            args.output.info("Deleting {}".format(service))
+            db.delete_service(service)
+        else:
+            args.output.info("Service {} unknown".format(service))
 
 def list_services(db, args):
     args.output.debug("Listing services:")
@@ -205,7 +218,12 @@ def parse_args(argv, output):
     parser_add.set_defaults(command_function=add_services)
     parser_add.add_argument("services", metavar="hostnames", type=str,
 			    nargs="+", help="services to add")
-    
+ 
+    parser_delete = subparsers.add_parser("delete", help="delete service")
+    parser_delete.set_defaults(command_function=delete_services)
+    parser_delete.add_argument("services", metavar="hostnames", type=str,
+                               nargs="+", help="services to delete")
+
     parser_list = subparsers.add_parser("list", help="list services")
     parser_list.set_defaults(command_function=list_services)
 
