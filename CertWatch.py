@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-"""Monitor HTTPS sites for certificate changes"""
+"""Monitor HTTPS sites for certificate changes
+
+Requires Python 2.7+
+Requires twurl: https://github.com/marcel/twurl"""
 import argparse
 import collections
 import ConfigParser
